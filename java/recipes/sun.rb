@@ -24,9 +24,11 @@ node.run_state[:java_pkgs] = value_for_platform(
 )
 
 case node.platform
-when "debian","ubuntu"
+when "debian"
   include_recipe "apt"
- 
+when "ubuntu"
+  include_recipe "apt"
+
   template "/etc/apt/sources.list.d/canonical.com.list" do
     mode "0644"
     source "canonical.com.list.erb"
