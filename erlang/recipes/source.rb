@@ -8,7 +8,7 @@ SOURCE_TARBALL = File.join(Chef::Config[:file_cache_path], "otp_src_#{node[:erla
 
 remote_file SOURCE_TARBALL do
   checksum node[:erlang][:src_checksum]
-  source node[:erlang][:src_mirror]
+  source node[:erlang][:src_url]
 end
 
 bash "install erlang #{node[:erlang][:src_version]}" do
