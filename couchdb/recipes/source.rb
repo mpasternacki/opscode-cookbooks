@@ -22,7 +22,12 @@ if node[:platform] == "ubuntu" && node[:platform_version].to_f == 8.04
   return
 end
 
-include_recipe "erlang"
+case node[:platform]
+when "debian"
+  include_recipe "erlang::source"
+else
+  include_recipe "erlang"
+end
 
 couchdb_tar_gz = File.join(Chef::Config[:file_cache_path], "/", "apache-couchdb-#{node[:couch_db][:src_version]}.tar.gz")
 compile_flags = String.new
