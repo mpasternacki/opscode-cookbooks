@@ -46,7 +46,7 @@ when "ubuntu"
   include_recipe "java"
   include_recipe "rabbitmq_chef"
 when "debian"
-  if node[:platform_version] =~ /.*sid/
+  if (node.platform_version.to_f < 5.0 || (node.platform_version.to_f == 5.0 && node.platform_version !~ /.*sid/ ))
     include_recipe "couchdb"
   else
     include_recipe "couchdb::source"
