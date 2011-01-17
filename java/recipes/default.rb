@@ -52,8 +52,8 @@ end
 
 # re-run update-java-alternatives if our java flavor changes
 if node.languages.attribute?("java")
-  unless node.languages.java.hotspot.name.match(current_java_version_pattern)
-    log "Java install_flavor has changed, re-running 'update-java-alternatives'" do
+  unless node.languages.java.attribute?("hotspot") and node.languages.java.hotspot.name.match(current_java_version_pattern)
+    log "Java install_flavor is unknown or has changed, re-running 'update-java-alternatives'" do
       level :info
       notifies :run, resources(:execute => "update-java-alternatives"), :immediately
     end
