@@ -29,7 +29,7 @@ end
 package "postgresql"
 
 service "postgresql" do
-  service_name "postgresql-#{node.postgresql.version}"
+  service_name ( (node.platform == 'ubuntu' && node.platform_version >= '10.10') ? "postgresql" : "postgresql-#{node.postgresql.version}" )
   supports :restart => true, :status => true, :reload => true
   action :nothing
 end
