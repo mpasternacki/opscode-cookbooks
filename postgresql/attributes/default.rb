@@ -27,6 +27,11 @@ when "debian"
 
   set[:postgresql][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/main"
 
+  if platform_version.to_f >= 6
+    default[:postgresql][:service_name] = "postgresql"
+  else
+    default[:postgresql][:service_name] = "postgresql-#{node[:postgresql][:version]}"
+  end
 when "ubuntu"
 
   if platform_version.to_f <= 9.04
@@ -37,6 +42,11 @@ when "ubuntu"
 
   set[:postgresql][:dir] = "/etc/postgresql/#{node[:postgresql][:version]}/main"
 
+  if platform_version.to_f >= 10.1
+    set[:postgresql][:service_name] = "postgresql"
+  else
+    set[:postgresql][:service_name] = "postgresql-#{node[:postgresql][:version]}"
+  end
 when "fedora"
 
   if platform_version.to_f <= 12
