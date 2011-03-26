@@ -46,7 +46,8 @@ else
   end
 end
 
-munin_servers = search(:node, "munin:[* TO *] AND role:#{node[:app_environment]}")
+munin_servers = search(:node,
+  node[:munin][:client_query] || "munin:[* TO *] AND role:#{node[:app_environment]}")
 
 if node[:public_domain]
   case node[:app_environment]

@@ -8,7 +8,7 @@ REQUIREMENTS
 
 Requires Chef 0.8+ for search capability of roles and data bags.
 
-The monitoring server that uses this recipe should have a role named 'monitoring'. A role named after the environment (e.g., "production") and a node attribute `app_environment` with a value of the same should be created for all nodes. The server uses this to search for only nodes that belong to its same environment.
+The monitoring server that uses this recipe should have a role named 'monitoring'. A role named after the environment (e.g., "production") and a node attribute `app_environment` with a value of the same should be created for all nodes. The server uses this to search for only nodes that belong to its same environment. Alternatively, attribute `munin.client_query` can be set on Munin server node to configure query used to find nodes.
 
 Because of the heavy use of search, this recipe will not work with Chef Solo, as it cannot do any searches without a server.
 
@@ -32,6 +32,7 @@ ATTRIBUTES
 ====
 
 * `['munin']['server_role']` - role of the munin server. Default is monitoring.
+* `['munin']['client_query']` - node search query to find munin nodes
 * `['munin']['webserver']` - apache2 or nginx
 * `['munin']['docroot']` - document root for the server apache vhost. on archlinux, the default is `/srv/http/munin`, or `/var/www/munin` on other platforms.
 
