@@ -18,6 +18,7 @@
 #
 
 default['munin']['server_role'] = 'monitoring'
+default['munin']['webserver'] = 'apache2'
 
 case node[:platform]
 when "arch"

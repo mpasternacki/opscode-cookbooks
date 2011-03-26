@@ -22,7 +22,7 @@ Cookbooks
 
 Opscode cookbooks
 
-* apache2
+* apache2 or nginx
 
 To install perl cpan modules for munin plugins
 
@@ -32,6 +32,7 @@ ATTRIBUTES
 ====
 
 * `['munin']['server_role']` - role of the munin server. Default is monitoring.
+* `['munin']['webserver']` - apache2 or nginx
 * `['munin']['docroot']` - document root for the server apache vhost. on archlinux, the default is `/srv/http/munin`, or `/var/www/munin` on other platforms.
 
 RECIPES

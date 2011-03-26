@@ -17,9 +17,14 @@
 # limitations under the License.
 #
 
-include_recipe "apache2"
-include_recipe "apache2::mod_auth_openid"
-include_recipe "apache2::mod_rewrite"
+case node[:munin][:webserver]
+when "apache2"
+  include_recipe "apache2"
+  include_recipe "apache2::mod_auth_openid"
+  include_recipe "apache2::mod_rewrite"
+when "nginx"
+  include_recipe "nginx"
+end
 include_recipe "munin::client"
 
 package "munin"
@@ -60,18 +65,6 @@ template "/etc/munin/munin.conf" do
   variables(:munin_nodes => munin_servers)
 end
 
-apache_site "000-default" do
-  enable false
-end
-
-template "#{node[:apache][:dir]}/sites-available/munin.conf" do
-  source "apache2.conf.erb"
-  mode 0644
-  variables :public_domain => public_domain
-  if ::File.symlink?("#{node[:apache][:dir]}/sites-enabled/munin.conf")
-    notifies :reload, resources(:service => "apache2")
-  end
-end
 
 directory node['munin']['docroot'] do
   owner "munin"
@@ -79,4 +72,27 @@ directory node['munin']['docroot'] do
   mode 0755
 end
 
-apache_site "munin.conf"
+case node[:munin][:webserver]
+when "apache2"
+  apache_site "000-default" do
+    enable false
+  end
+
+  template "#{node[:apache][:dir]}/sites-available/munin.conf" do
+    source "apache2.conf.erb"
+    mode 0644
+    variables :public_domain => public_domain
+    if ::File.symlink?("#{node[:apache][:dir]}/sites-enabled/munin.conf")
+      notifies :reload, resources(:service => "apache2")
+    end
+  end
+  apache_site "munin.conf"
+when "nginx"
+  template "#{node[:nginx][:dir]}/sites-available/munin" do
+    source "nginx_site.erb"
+    mode 0644
+    variables :public_domain => public_domain
+  end
+  nginx_site "munin"
+end
+

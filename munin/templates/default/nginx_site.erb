@@ -1,0 +1,15 @@
+# Generated automatically by Chef. Do not edit.
+server {
+  listen 80;
+  server_name munin.<%= node[:app_environment] %>.<%= @public_domain %>;
+
+  access_log /var/log/nginx/munin.access.log;
+
+  location / {
+    root   /var/www/munin;
+  }
+
+  location /munin/ {
+    alias /var/www/munin/;
+  }
+}
