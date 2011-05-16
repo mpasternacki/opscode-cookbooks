@@ -1,0 +1,14 @@
+# Generated automatically by Chef. Do not edit.
+server {
+  listen 80;
+  server_name nagios.<%= node[:app_environment] %>.<%= @public_domain %>;
+
+  access_log /var/nagios3/nginx_access.log;
+  error_log /var/nagios3/nginx_error.log;
+
+  include /etc/nginx/conf-include.d/php;
+
+  location / {
+    root   <%= node[:nagios][:docroot] %>;
+  }
+}
