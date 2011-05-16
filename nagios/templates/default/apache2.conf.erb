@@ -20,6 +20,7 @@
     AuthOpenIDDBLocation /var/cache/apache2/mod_auth_openid.db
     AuthOpenIDUserProgram /usr/local/bin/mod_auth_openid.rb
   </Location>
+<% when "none" -%>
 <% else -%>
   <Location />
     AuthName "Nagios Server"

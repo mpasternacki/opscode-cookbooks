@@ -20,9 +20,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_recipe "apache2"
-include_recipe "apache2::mod_ssl"
-include_recipe "apache2::mod_rewrite"
+case node[:nagios][:webserver]
+when "apache2"
+  include_recipe "apache2"
+  include_recipe "apache2::mod_ssl"
+  include_recipe "apache2::mod_rewrite"
+when "nginx"
+  include_recipe "nginx"
+  include_recipe "nginx::php"
+else
+  raise "Unknown nagios.webserver #{node[:nagios][:webserver]}"
+end
 include_recipe "nagios::client"
 
 sysadmins = search(:users, 'groups:sysadmin')
@@ -81,7 +89,10 @@ end
 
 directory "#{node[:nagios][:state_dir]}/rw" do
   owner "nagios"
-  group node[:apache][:user]
+  group case node[:nagios][:webserver]
+        when "apache2": node[:apache][:user]
+        when "nginx":   node[:nginx][:user]
+        end
   mode "2710"
 end
 
@@ -90,39 +101,67 @@ execute "archive default nagios object definitions" do
   not_if { Dir.glob(node[:nagios][:dir] + "/conf.d/*_nagios*.cfg").empty? }
 end
 
-file "#{node[:apache][:dir]}/conf.d/nagios3.conf" do
-  action :delete
-end
+case node[:nagios][:webserver]
+when "apache2"
+  file "#{node[:apache][:dir]}/conf.d/nagios3.conf" do
+    action :delete
+  end
 
-case node[:nagios][:server_auth_method]
-when "openid"
-  include_recipe "apache2::mod_auth_openid"
-else
-  template "#{node[:nagios][:dir]}/htpasswd.users" do
-    source "htpasswd.users.erb"
-    owner "nagios"
-    group node[:apache][:user]
+  case node[:nagios][:server_auth_method]
+  when "openid"
+    include_recipe "apache2::mod_auth_openid"
+  else
+    template "#{node[:nagios][:dir]}/htpasswd.users" do
+      source "htpasswd.users.erb"
+      owner "nagios"
+      group node[:apache][:user]
+      mode 0640
+      variables(
+        :sysadmins => sysadmins
+        )
+    end
+  end
+
+  apache_site "000-default" do
+    enable false
+  end
+
+  template "#{node[:apache][:dir]}/sites-available/nagios3.conf" do
+    source "apache2.conf.erb"
+    mode 0644
+    variables :public_domain => public_domain
+    if ::File.symlink?("#{node[:apache][:dir]}/sites-enabled/nagios3.conf")
+      notifies :reload, resources(:service => "apache2")
+    end
+  end
+
+  apache_site "nagios3.conf"
+when "nginx"
+  case node[:nagios][:server_auth_method]
+  when "openid"
+    raise "OpenID auth not supported with nginx"
+  else
+    template "#{node[:nagios][:dir]}/htpasswd.users" do
+      source "htpasswd.users.erb"
+      owner "nagios"
+      group node[:nginx][:user]
+      mode 0640
+      variables(
+        :sysadmins => sysadmins
+        )
+    end
+  end
+
+  package "fcgiwrap"
+
+  template "#{node[:nginx][:dir]}/sites-available/nagios" do
+    source "nginx_site.erb"
+    group node[:nginx][:user]
     mode 0640
-    variables(
-      :sysadmins => sysadmins
-    )
+    notifies :reload, resources(:service => "nginx")
   end
+  nginx_site "nagios"
 end
-
-apache_site "000-default" do
-  enable false
-end
-
-template "#{node[:apache][:dir]}/sites-available/nagios3.conf" do
-  source "apache2.conf.erb"
-  mode 0644
-  variables :public_domain => public_domain
-  if ::File.symlink?("#{node[:apache][:dir]}/sites-enabled/nagios3.conf")
-    notifies :reload, resources(:service => "apache2")
-  end
-end
-
-apache_site "nagios3.conf"
 
 %w{ nagios cgi }.each do |conf|
   nagios_conf conf do
