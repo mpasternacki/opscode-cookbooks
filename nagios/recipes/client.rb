@@ -30,16 +30,25 @@ else
   end
 end
 
-%w{
-  nagios-nrpe-server
-  nagios-plugins
-  nagios-plugins-basic
-  nagios-plugins-standard
-}.each do |pkg|
-  package pkg
+case node[:platform]
+when "centos","redhat","fedora","suse"
+  package "nrpe"
+  package "nagios-plugins-nrpe"
+  nrpe_service = "nrpe"
+when "debian","ubuntu"
+  %w{
+    nagios-nrpe-server
+    nagios-plugins
+    nagios-plugins-basic
+    nagios-plugins-standard
+  }.each do |pkg|
+    package pkg
+  end
+  nrpe_service = "nagiosn-nrpe-server"
 end
 
 service "nagios-nrpe-server" do
+  service_name nrpe_service
   action :enable
   supports :restart => true, :reload => true
 end
