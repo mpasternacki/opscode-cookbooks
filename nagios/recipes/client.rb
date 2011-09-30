@@ -44,7 +44,7 @@ when "debian","ubuntu"
   }.each do |pkg|
     package pkg
   end
-  nrpe_service = "nagiosn-nrpe-server"
+  nrpe_service = "nagios-nrpe-server"
 end
 
 service "nagios-nrpe-server" do
