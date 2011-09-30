@@ -18,7 +18,14 @@
 # limitations under the License.
 #
 
-%w{ libsasl2-2  ca-certificates}.each do |pkg|
+sasl_pkgs = case node[:platform]
+            when "centos","redhat","fedora","suse"
+              %w{cyrus-sasl-lib cyrus-sasl-md5 cyrus-sasl-plain}
+            when "debian","ubuntu"
+              %w{libsasl2-2  ca-certificates}
+            end
+
+sasl_pkgs.each do |pkg|
   package pkg do
     action :install
   end
